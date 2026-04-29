@@ -39,6 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('clients/{id}/restore', [ClientController::class, 'restore']);
 
     // Invoices
+    Route::get('invoices/overdue', [InvoiceController::class, 'overdue']);
     Route::apiResource('invoices', InvoiceController::class);
     Route::patch('invoices/{invoice}/status', [InvoiceController::class, 'updateStatus']);
 });

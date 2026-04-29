@@ -10,6 +10,7 @@ use App\Models\InvoiceItem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\JsonResponse as HttpFoundationJsonResponse;
 
 class InvoiceController extends Controller
 {
@@ -270,6 +271,32 @@ class InvoiceController extends Controller
             'recent_invoices'=> $recent,
             'monthly_revenue'=> $monthly,
         ]);
+    }
+
+    public function overdue(Request $request): JsonResponse
+    {
+        // Auto-promote any sent+past-due invoices to overdue status
+        $request->user()
+            ->invoices()
+            ->where('status', Invoice::STATUS_SENT)
+            ->where('due_date', '<', now()->toDateString())
+            ->update(['status' => Invoice::STATUS_OVERDUE]);
+
+        $invoices = $request->user()
+            ->invoices()
+            ->with('client:id,name,company,email')
+            ->where('status', Invoice::STATUS_OVERDUE)
+            ->orderBy('due_date', 'asc')
+            ->paginate($request->query('per_page', 15));
+
+        $totalOverdue = $request->user()
+            ->invoices()
+            ->where('status', Invoice::STATUS_OVERDUE)
+            ->sum('total_amount');
+
+        return response()->json(['total_overdue_amount' => $totalOverdue, 'invoices' => $invoices]);
+
+
     }
 
     // ── Private helpers ───────────────────────────────────────────────────
