@@ -295,8 +295,6 @@ class InvoiceController extends Controller
             ->sum('total_amount');
 
         return response()->json(['total_overdue_amount' => $totalOverdue, 'invoices' => $invoices]);
-
-
     }
 
     // ── Private helpers ───────────────────────────────────────────────────
