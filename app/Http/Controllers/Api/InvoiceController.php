@@ -57,7 +57,7 @@ class InvoiceController extends Controller
         // Flag overdue invoices automatically
         $query->orderBy('created_at', 'desc');
 
-        $invoices = $query->paginate($request->query('per_page', 15));
+        $invoices = $query->paginate(min((int) $request->query('per_page', 15), 100));
 
         return response()->json($invoices);
     }
@@ -275,6 +275,10 @@ class InvoiceController extends Controller
 
     public function overdue(Request $request): JsonResponse
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:1|max:100',
+        ]);
+
         // Auto-promote any sent+past-due invoices to overdue status
         $request->user()
             ->invoices()
