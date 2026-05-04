@@ -17,6 +17,13 @@ class ClientController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $request->validate([
+            'per_page' => 'sometimes|integer|min:1|max:100',
+            'search' => 'sometimes|string|max:100',
+            'sort_by' => 'sometimes|string|in:name,email,company,created_at',
+            'sort_dir' => 'sometimes|string|in:asc,desc',
+        ]);
+
         $query = $request->user()
             ->clients()
             ->withCount('invoices')
@@ -39,7 +46,7 @@ class ClientController extends Controller
             $query->orderBy($sortBy, $sortDir === 'asc' ? 'asc' : 'desc');
         }
 
-        $clients = $query->paginate($request->query('per_page', 15));
+        $clients = $query->paginate(min((int) $request->query('per_page', 15), 100));
 
         return response()->json($clients);
     }

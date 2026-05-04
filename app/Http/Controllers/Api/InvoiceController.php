@@ -20,6 +20,17 @@ class InvoiceController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $request->validate([
+            'per page' => 'sometimes|integer|min:1|max:100',
+            'status' => 'sometimes|string|in:draft,sent,paid,overdue,cancelled',
+            'client_id' => 'sometimes|integer|exists:clients,id',
+            'date_from' => 'sometimes|date',
+            'date_to' => 'sometimes|date|after_or_eequal:date_from',
+            'search' => 'sometimes|string|max:100',
+            'sort_by' => 'sometimes|string|in:created_at,issue_date,due_date,total_amount',
+            'sort_dir' => 'sometimes|string|in:asc,desc',
+        ]);
+
         $query = $request->user()
             ->invoices()
             ->with('client:id,name,company,email')
