@@ -237,6 +237,8 @@ class InvoiceController extends Controller
      */
     public function summary(Request $request): JsonResponse
     {
+        $request->validate([]);
+        
         $userId = $request->user()->id;
 
         $stats = Invoice::forUser($userId)
