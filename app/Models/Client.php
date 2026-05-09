@@ -70,4 +70,32 @@ class Client extends Model
             ->keyBy('status')
             ->toArray();
     }
+
+    /**
+     * Search clients by name, email, or company.
+     */
+    public function scopeSearch($query, ?string $term)
+    {
+        if (! $term) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($term) {
+            $q->where('name', 'like', "%{$term}%")
+                ->orWhere('email', 'like', "%{$term}%")
+                ->orWhere('company', 'like', "%{$term}%");
+        });
+    }
+
+    /**
+     * Apply sort with allowlist validation.
+     */
+    public function scopeSorted($query, string $by = 'created_at', string $dir = 'desc')
+    {
+        $allowed = ['name', 'email', 'company', 'created_at'];
+        return $query->orderBy(
+            in_array($by, $allowed) ? $by : 'created_at',
+            $dir === 'asc' ? 'asc' : 'desc'
+        );
+    }
 }

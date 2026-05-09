@@ -31,7 +31,7 @@ class InvoiceController extends Controller
             'sort_dir' => 'sometimes|string|in:asc,desc',
         ]);
 
-        $query = $request->user()
+        /**$query = $request->user()
             ->invoices()
             ->with('client:id,name,company,email')
             ->withCount('items');
@@ -68,7 +68,25 @@ class InvoiceController extends Controller
         // Flag overdue invoices automatically
         $query->orderBy('created_at', 'desc');
 
-        $invoices = $query->paginate(min((int) $request->query('per_page', 15), 100));
+        $invoices = $query->paginate(min((int) $request->query('per_page', 15), 100));*/
+
+        $invoices = $request->user()
+            ->invoices()
+            ->with('client:id,name,company,email')
+            ->withCount('items')
+            ->byStatus($request->query('status'))
+            ->when(
+                $request->query('client_id'),
+                fn($q, $id) =>
+                $q->where('client_id', $id)
+            )
+            ->search($request->query('search'))
+            ->dateRange($request->query('date_from'), $request->query('date_to'))
+            ->sorted(
+                $request->query('sort_by', 'created_at'),
+                $request->query('sort_dir', 'desc')
+            )
+            ->paginate(min((int) $request->query('per_page', 15), 100));
 
         return response()->json($invoices);
     }
@@ -89,8 +107,8 @@ class InvoiceController extends Controller
                 'tax_amount'      => 0,
                 'total_amount'    => 0,
                 'currency'        => $request->currency
-                                     ?? $request->user()->currency
-                                     ?? 'USD',
+                    ?? $request->user()->currency
+                    ?? 'USD',
             ]);
 
             // Create line items (model observers auto-calculate line_total
@@ -238,7 +256,7 @@ class InvoiceController extends Controller
     public function summary(Request $request): JsonResponse
     {
         $request->validate([]);
-        
+
         $userId = $request->user()->id;
 
         $stats = Invoice::forUser($userId)
@@ -281,8 +299,8 @@ class InvoiceController extends Controller
 
         return response()->json([
             'stats'          => $stats,
-            'recent_invoices'=> $recent,
-            'monthly_revenue'=> $monthly,
+            'recent_invoices' => $recent,
+            'monthly_revenue' => $monthly,
         ]);
     }
 

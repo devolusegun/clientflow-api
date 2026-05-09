@@ -91,6 +91,52 @@ class Invoice extends Model
             ->where('due_date', '<', now()->toDateString());
     }
 
+    /**
+     * Search invoices by invoice number or client name/company.
+     */
+    public function scopeSearch($query, ?string $term)
+    {
+        if (! $term) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($term) {
+            $q->where('invoice_number', 'like', "%{$term}%")
+                ->orWhereHas(
+                    'client',
+                    fn($cq) =>
+                    $cq->where('name', 'like', "%{$term}%")
+                        ->orWhere('company', 'like', "%{$term}%")
+                );
+        });
+    }
+
+    /**
+     * Filter by date range on issue_date.
+     */
+    public function scopeDateRange($query, ?string $from, ?string $to)
+    {
+        if ($from) {
+            $query->whereDate('issue_date', '>=', $from);
+        }
+        if ($to) {
+            $query->whereDate('issue_date', '<=', $to);
+        }
+        return $query;
+    }
+
+    /**
+     * Apply sort with allowlist validation.
+     */
+    public function scopeSorted($query, string $by = 'created_at', string $dir = 'desc')
+    {
+        $allowed = ['created_at', 'issue_date', 'due_date', 'total_amount'];
+        return $query->orderBy(
+            in_array($by, $allowed) ? $by : 'created_at',
+            $dir === 'asc' ? 'asc' : 'desc'
+        );
+    }
+
     // ── Business logic ────────────────────────────────────────────────────
 
     /**
