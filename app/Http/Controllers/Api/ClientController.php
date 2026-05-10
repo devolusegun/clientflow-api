@@ -24,7 +24,7 @@ class ClientController extends Controller
             'sort_dir' => 'sometimes|string|in:asc,desc',
         ]);
 
-        $query = $request->user()
+        /**$query = $request->user()
             ->clients()
             ->withCount('invoices')
             ->withSum('invoices', 'total_amount');
@@ -47,6 +47,18 @@ class ClientController extends Controller
         }
 
         $clients = $query->paginate(min((int) $request->query('per_page', 15), 100));
+
+        return response()->json($clients);*/
+        $clients = $request->user()
+            ->clients()
+            ->withCount('invoices')
+            ->withSum('invoices', 'total_amount')
+            ->search($request->query('search'))
+            ->sorted(
+                $request->query('sort_by', 'created_at'),
+                $request->query('sort_dir', 'desc')
+            )
+            ->paginate(min((int) $request->query('per_page', 15), 100));
 
         return response()->json($clients);
     }
