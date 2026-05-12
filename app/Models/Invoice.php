@@ -126,7 +126,7 @@ class Invoice extends Model
     }
 
     /**
-     * Apply sort with allowlist validation.
+     * sort with allowlist validation.
      */
     public function scopeSorted($query, string $by = 'created_at', string $dir = 'desc')
     {
@@ -157,7 +157,7 @@ class Invoice extends Model
     }
 
     /**
-     * Marks the invoice as overdue if past due_date and still sent.
+     * Here we mark the invoice as overdue if past due_date and still sent.
      */
     public function checkAndMarkOverdue(): bool
     {
@@ -183,9 +183,9 @@ class Invoice extends Model
     }
 
     /**
-     * Generates a unique invoice number for the given user.
-     * Format: INV-{YEAR}-{ZERO_PADDED_SEQUENCE}
-     * e.g. INV-2025-0042
+     * Gens unique invoice number for the given user.
+     * Format: INV-2025-0042
+     *  
      */
     public static function generateNumber(int $userId): string
     {
