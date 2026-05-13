@@ -8,6 +8,10 @@ use App\Http\Requests\Client\UpdateClientRequest;
 use App\Models\Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Resources\InvoiceResource;
+use App\Http\Resources\InvoiceItemResource;
+use App\Http\Resources\ClientResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ClientController extends Controller
 {
@@ -15,7 +19,7 @@ class ClientController extends Controller
      * List all clients for the authenticated user.
      * Supports search, sorting, and pagination.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection //JsonResponse
     {
         $request->validate([
             'per_page' => 'sometimes|integer|min:1|max:100',
@@ -60,8 +64,9 @@ class ClientController extends Controller
             )
             ->paginate(min((int) $request->query('per_page', 15), 100));
 
-        return response()->json($clients);
-    }
+        //return response()->json($clients);
+        return ClientResource::collection($clients);
+    }   
 
     /**
      * Create a new client.

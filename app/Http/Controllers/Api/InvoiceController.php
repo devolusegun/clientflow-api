@@ -11,6 +11,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\JsonResponse as HttpFoundationJsonResponse;
+use App\Http\Resources\InvoiceResource;
+use App\Http\Resources\InvoiceItemResource;
+// and for ClientController:
+use App\Http\Resources\ClientResource;
 
 class InvoiceController extends Controller
 {
@@ -89,6 +93,7 @@ class InvoiceController extends Controller
             ->paginate(min((int) $request->query('per_page', 15), 100));
 
         return response()->json($invoices);
+        //return InvoiceResource::collection($invoices);
     }
 
     /**
@@ -122,7 +127,8 @@ class InvoiceController extends Controller
                 ]);
             }
 
-            return $invoice->fresh(['items', 'client']);
+            //return $invoice->fresh(['items', 'client']);
+            return new InvoiceResource($invoice->fresh(['items', 'client']));
         });
 
         return response()->json([
@@ -139,12 +145,13 @@ class InvoiceController extends Controller
         $this->authorizeInvoice($request, $invoice);
 
         $invoice->load(['client', 'items']);
+        
 
         // Auto-mark overdue on retrieval
         $invoice->checkAndMarkOverdue();
 
         return response()->json([
-            'invoice'      => $invoice->fresh(['client', 'items']),
+            'invoice'      => new InvoiceResource($invoice->fresh(['items', 'client'])), //$invoice->fresh(['client', 'items']),
             'is_overdue'   => $invoice->is_overdue,
             'days_overdue' => $invoice->days_overdue,
         ]);
@@ -184,7 +191,8 @@ class InvoiceController extends Controller
 
         return response()->json([
             'message' => 'Invoice updated.',
-            'invoice' => $invoice->fresh(['items', 'client']),
+            //'invoice' => $invoice->fresh(['items', 'client']),
+            'invoice' => new InvoiceResource($invoice->fresh(['items', 'client'])),
         ]);
     }
 
@@ -227,7 +235,7 @@ class InvoiceController extends Controller
 
         return response()->json([
             'message' => "Invoice marked as {$newStatus}.",
-            'invoice' => $invoice->fresh(['items', 'client']),
+            'invoice' => new InvoiceResource($invoice->fresh(['items', 'client'])), //$invoice->fresh(['items', 'client']), 
         ]);
     }
 
