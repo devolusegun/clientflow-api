@@ -138,7 +138,7 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Show a single invoice with all line items and client details.
+     * Showing a single invoice with all line items and client details.
      */
     public function show(Request $request, Invoice $invoice): JsonResponse
     {
