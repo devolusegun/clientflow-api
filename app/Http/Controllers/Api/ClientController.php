@@ -64,7 +64,7 @@ class ClientController extends Controller
             )
             ->paginate(min((int) $request->query('per_page', 15), 100));
 
-        //return response()->json($clients);
+        //
         return ClientResource::collection($clients);
     }   
 
