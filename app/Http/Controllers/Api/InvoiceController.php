@@ -191,7 +191,6 @@ class InvoiceController extends Controller
 
         return response()->json([
             'message' => 'Invoice updated.',
-            //'invoice' => $invoice->fresh(['items', 'client']),
             'invoice' => new InvoiceResource($invoice->fresh(['items', 'client'])),
         ]);
     }
