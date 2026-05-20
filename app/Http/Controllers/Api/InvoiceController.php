@@ -15,6 +15,7 @@ use App\Http\Resources\InvoiceResource;
 use App\Http\Resources\InvoiceItemResource;
 // and for ClientController:
 use App\Http\Resources\ClientResource;
+use App\Http\Resources\DashboardResource;
 
 class InvoiceController extends Controller
 {
@@ -260,7 +261,7 @@ class InvoiceController extends Controller
     /**
      * Dashboard summary statistics for the authenticated user.
      */
-    public function summary(Request $request): JsonResponse
+    public function summary(Request $request): DashboardResource
     {
         $request->validate([]);
 
@@ -304,8 +305,13 @@ class InvoiceController extends Controller
             ->get()
             ->keyBy('month');
 
-        return response()->json([
+        /**return response()->json([
             'stats'          => $stats,
+            'recent_invoices' => $recent,
+            'monthly_revenue' => $monthly,
+        ]);**/
+        return new DashboardResource([
+            'stats' => $stats,
             'recent_invoices' => $recent,
             'monthly_revenue' => $monthly,
         ]);
