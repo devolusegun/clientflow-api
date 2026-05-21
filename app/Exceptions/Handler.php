@@ -48,7 +48,19 @@ class Handler extends ExceptionHandler
                 ], 422);
             }
 
+            //HTTP Generic Exceptions
+            if ($e instanceof HttpException) {
+                return response()->json([
+                    'message' => $e->getMessage() ?: 'An error occured.',
+                ], $e->getStatusCode());
+            }
 
+            // 500 - catch-all for production
+            if (! config('app.debug')) {
+                return response()->json([
+                    'message' => 'server error. Please try again later.',
+                ], 500);
+            }
 
             return null;
         });
