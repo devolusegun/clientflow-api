@@ -33,6 +33,21 @@ class Handler extends ExceptionHandler
                 ], 404);
             }
 
+            //401 - unauthenticated
+            if ($e instanceof AuthenticationException) {
+                return response()->json([
+                    'message' => 'Unauthenticated . Please provide a valid token.',
+                ], 401);
+            }
+
+            //422 - validation errors
+            if ($e instanceof ValidationException) {
+                return response()->json([
+                    'message' => 'Validation failed.',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+
 
 
             return null;
