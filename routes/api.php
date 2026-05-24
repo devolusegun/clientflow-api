@@ -15,6 +15,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// health check endpoint
+Route::get('health', fn () => response()->json([
+    'status' => 'ok',
+    'timestamp' => now()->toISOString(),
+]));
+
 // ── Public routes (no auth required) ─────────────────────────────────────────
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
