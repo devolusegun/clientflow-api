@@ -16,11 +16,11 @@ class DatabaseSeeder extends Seeder
     {
         // Demo user
         $user = User::create([
-            'name'         => 'Solomon Olusegun',
+            'name'         => 'Dev Olu',
             'email'        => 'demo@clientflow.test',
             'password'     => Hash::make('password'),
             'company_name' => 'DevOlusegun Studio',
-            'phone'        => '+234 815 536 6935',
+            'phone'        => '+239 810 500 6900',
             'currency'     => 'USD',
         ]);
 
