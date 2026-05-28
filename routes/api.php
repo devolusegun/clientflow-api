@@ -22,13 +22,13 @@ Route::get('health', fn () => response()->json([
 ]));
 
 // ── Public routes (no auth required) ─────────────────────────────────────────
-Route::prefix('auth')->group(function () {
+Route::middleware('throttle:10,1')->prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login',    [AuthController::class, 'login']);
 });
 
 // ── Protected routes (Sanctum auth required) ──────────────────────────────────
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
 
     // Auth
     Route::prefix('auth')->group(function () {
