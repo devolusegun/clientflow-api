@@ -35,7 +35,7 @@ jobs:
           extensions: mbstring, dom, fileinfo, mysql
 
       - name: Copy .env
-        run: cp .env.example .env
+        run: cp .env.testing .env
 
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
