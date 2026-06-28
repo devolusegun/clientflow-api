@@ -40,4 +40,49 @@ class InvoiceTest extends TestCase
         $this->assertCount(2, $invoice->items);
     }
 
+    public function test_invoice_number_is_auto_generated(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+        $client = Client::factory()->for($user)->create();
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/invoices', [
+                'client_id'  => $client->id,
+                'issue_date' => '2025-01-15',
+                'due_date'   => '2025-02-15',
+                'items'      => [['description' => 'Test', 'quantity' => 1, 'unit_price' => 100]],
+            ]);
+
+        $invoice = Invoice::first();
+        $this->assertMatchesRegularExpression('/^INV-\d{4}-\d{4}$/', $invoice->invoice_number);
+
+    }
+
+    public function test_user_can_transition_invoice_to_paid(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+        $client = Client::factory()->for($user)->create();
+
+        $invoice = Invoice::create([
+            'user_id'        => $user->id,
+            'client_id'      => $client->id,
+            'invoice_number' => 'INV-2025-0001',
+            'status'         => Invoice::STATUS_SENT,
+            'issue_date'     => '2025-01-01',
+            'due_date'       => '2025-02-01',
+            'total_amount'   => 500,
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')
+            ->patchJson("/api/invoices/{$invoice->id}/status", [
+                'status' => 'paid',
+            ]);
+
+        $response->assertStatus(200);
+        $this->assertEquals('paid', $invoice->fresh()->status);
+        $this->assertNotNull($invoice->fresh()->paid_at);
+    }
+
 }
