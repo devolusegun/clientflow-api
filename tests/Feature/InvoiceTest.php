@@ -87,12 +87,12 @@ class InvoiceTest extends TestCase
 
     public function test_invalid_status_transition_is_rejected(): void{
         /** @var User $user */
-        $user = User::factory() -> create();
+        $user = User::factory()->create();
         $client = Client::factory()->for($user)->create();
 
         $invoice = Invoice::create([
-            'user id' => $user->id,
-            'cliend_id' => $client->id,
+            'user_id' => $user->id,
+            'client_id' => $client->id,
             'invoice_number' => 'INV-2025-0002',
             'status' => Invoice::STATUS_DRAFT,
             'issue_date' => '2026-01-01',
@@ -109,6 +109,30 @@ class InvoiceTest extends TestCase
 
         $response->assertStatus(422);
         $this->assertEquals('draft', $invoice->fresh()->status);
+    }
+
+    public function test_user_cannot_access_another_users_invoice(): void
+    {
+        /** @var User $owner */
+        $owner = User::factory()->create();
+        /** @var User $intruder */
+        $intruder = User::factory()->create();
+        $client = Client::factory()->for($owner)->create();
+
+        $invoice = Invoice::create([
+            'user_id'        => $owner->id,
+            'client_id'      => $client->id,
+            'invoice_number' => 'INV-2025-0003',
+            'status'         => Invoice::STATUS_DRAFT,
+            'issue_date'     => '2025-01-01',
+            'due_date'       => '2025-02-01',
+            'total_amount'   => 500,
+        ]);
+
+        $response = $this->actingAs($intruder, 'sanctum')
+            ->getJson("/api/invoices/{$invoice->id}");
+
+        $response->assertStatus(403);
     }
 
 }
