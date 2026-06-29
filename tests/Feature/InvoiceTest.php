@@ -85,4 +85,30 @@ class InvoiceTest extends TestCase
         $this->assertNotNull($invoice->fresh()->paid_at);
     }
 
+    public function test_invalid_status_transition_is_rejected(): void{
+        /** @var User $user */
+        $user = User::factory() -> create();
+        $client = Client::factory()->for($user)->create();
+
+        $invoice = Invoice::create([
+            'user id' => $user->id,
+            'cliend_id' => $client->id,
+            'invoice_number' => 'INV-2025-0002',
+            'status' => Invoice::STATUS_DRAFT,
+            'issue_date' => '2026-01-01',
+            'due_date' => '2026-02-01',
+            'total_amount' => 500,
+
+        ]);
+
+        // draft cannot go directly to paid
+        $response = $this->actingAs($user, 'sanctum')
+            ->patchJson("/api/invoices/{$invoice->id}/status", [
+                'status' => 'paid',
+            ]);
+
+        $response->assertStatus(422);
+        $this->assertEquals('draft', $invoice->fresh()->status);
+    }
+
 }
