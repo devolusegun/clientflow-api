@@ -21,8 +21,8 @@ class InvoiceTest extends TestCase
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/invoices', [
                 'client_id'  => $client->id,
-                'issue_date' => '2025-01-15',
-                'due_date'   => '2025-02-15',
+                'issue_date' => '2026-01-15',
+                'due_date'   => '2026-02-15',
                 'tax_rate'   => 10,
                 'currency'   => 'USD',
                 'items'      => [
@@ -49,8 +49,8 @@ class InvoiceTest extends TestCase
         $this->actingAs($user, 'sanctum')
             ->postJson('/api/invoices', [
                 'client_id'  => $client->id,
-                'issue_date' => '2025-01-15',
-                'due_date'   => '2025-02-15',
+                'issue_date' => '2026-01-15',
+                'due_date'   => '2026-02-15',
                 'items'      => [['description' => 'Test', 'quantity' => 1, 'unit_price' => 100]],
             ]);
 
@@ -68,10 +68,10 @@ class InvoiceTest extends TestCase
         $invoice = Invoice::create([
             'user_id'        => $user->id,
             'client_id'      => $client->id,
-            'invoice_number' => 'INV-2025-0001',
+            'invoice_number' => 'INV-2026-0001',
             'status'         => Invoice::STATUS_SENT,
-            'issue_date'     => '2025-01-01',
-            'due_date'       => '2025-02-01',
+            'issue_date'     => '2026-01-01',
+            'due_date'       => '2026-02-01',
             'total_amount'   => 500,
         ]);
 
