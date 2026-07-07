@@ -146,7 +146,7 @@ class InvoiceController extends Controller
         $this->authorizeInvoice($request, $invoice);
 
         $invoice->load(['client', 'items']);
-        
+
 
         // Auto-mark overdue on retrieval
         $invoice->checkAndMarkOverdue();
@@ -261,7 +261,7 @@ class InvoiceController extends Controller
     /**
      * Dashboard summary statistics for the authenticated user.
      */
-    public function summary(Request $request): DashboardResource
+    public function summary(Request $request): JsonResponse
     {
         $request->validate([]);
 
@@ -299,22 +299,33 @@ class InvoiceController extends Controller
         $monthly = Invoice::forUser($userId)
             ->where('status', Invoice::STATUS_PAID)
             ->whereYear('paid_at', now()->year)
+            ->get(['paid_at', 'total_amount'])
+            ->groupBy(fn($invoice) => (int) $invoice->paid_at->format('n'))
+            ->map(fn($group) => [
+                'month'   => (int) $group->first()->paid_at->format('n'),
+                'revenue' => $group->sum('total_amount'),
+            ])
+            ->sortKeys();
+
+        /**$monthly = Invoice::forUser($userId)
+            ->where('status', Invoice::STATUS_PAID)
+            ->whereYear('paid_at', now()->year)
             ->selectRaw('MONTH(paid_at) as month, SUM(total_amount) as revenue')
             ->groupBy('month')
             ->orderBy('month')
             ->get()
-            ->keyBy('month');
+            ->keyBy('month');**/
 
-        /**return response()->json([
+        return response()->json([
             'stats'          => $stats,
             'recent_invoices' => $recent,
             'monthly_revenue' => $monthly,
-        ]);**/
-        return new DashboardResource([
+        ]);
+        /**return new DashboardResource([
             'stats' => $stats,
             'recent_invoices' => $recent,
             'monthly_revenue' => $monthly,
-        ]);
+        ]);**/
     }
 
     public function overdue(Request $request): JsonResponse

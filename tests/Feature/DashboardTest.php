@@ -26,7 +26,7 @@ class DashboardTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/dashboard');
-
+        
         $response->assertStatus(200)
             ->assertJsonPath('stats.total_invoices', 4)
             ->assertJsonPath('stats.paid_count', 2)
