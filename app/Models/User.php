@@ -11,10 +11,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
- 
+
     protected $fillable = [
         'name',
         'email',
@@ -24,31 +25,40 @@ class User extends Authenticatable
         'address',
         'currency',
     ];
- 
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
- 
+
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password'          => 'hashed',
     ];
- 
+
     // ── Relationships ─────────────────────────────────────────────────────
- 
-    public function clients()
+
+    /**public function clients()
+    {
+        return $this->hasMany(Client::class);
+    }**/
+    public function clients(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Client::class);
     }
- 
-    public function invoices()
+
+    /**public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }**/
+
+    public function invoices(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Invoice::class);
     }
  
     // ── Accessors ─────────────────────────────────────────────────────────
- 
+
     /**
      * Total revenue from all paid invoices.
      */
@@ -58,7 +68,7 @@ class User extends Authenticatable
             ->where('status', Invoice::STATUS_PAID)
             ->sum('total_amount');
     }
- 
+
     /**
      * Total outstanding (sent but unpaid) invoices.
      */
